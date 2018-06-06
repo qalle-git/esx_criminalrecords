@@ -1,5 +1,7 @@
 # esx_criminalrecords
 
+``Credits to jsfour, helped me alot.``
+
 [REQUIREMENTS]
   
 * ESX Jobs Support
