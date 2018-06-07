@@ -124,9 +124,11 @@ Citizen.CreateThread(function()
     if IsControlJustReleased(0, Keys['F5']) then
       local player, distance = ESX.Game.GetClosestPlayer()
       if distance ~= -1 and distance <= 3 then
-        openCriminalRecords(player)
+      	if PlayerData.job.name == 'police' then
+        	openCriminalRecords(player)
+        end
       else
-        sendNotification('not close enough', 'error', 5000)
+  	     sendNotification('not close enough', 'error', 5000)
       end
     end
   end
