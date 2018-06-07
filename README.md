@@ -111,6 +111,26 @@
               end
 ```
 
+then remove this from client.lua in esx_criminalrecords
+
+```lua
+Citizen.CreateThread(function()
+  while true do Citizen.Wait(0)
+    if IsControlJustReleased(0, Keys['F5']) then
+      local player, distance = ESX.Game.GetClosestPlayer()
+      if distance ~= -1 and distance <= 3 then
+      	if PlayerData.job.name == 'police' then
+        	openCriminalRecords(player)
+        end
+      else
+  	     sendNotification('not close enough', 'error', 5000)
+       end
+      end
+    end
+  end
+end)
+```
+
 locales
 
 ```lua
