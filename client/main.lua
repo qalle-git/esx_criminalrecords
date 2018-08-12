@@ -36,7 +36,6 @@ end)
 --== PUT THIS WHOLE CODE INTO POLICEJOB IN THE F6 MENU ==--
 -----------------------------------------------------------
 function openCriminalRecords(player)
-  local player, distance = ESX.Game.GetClosestPlayer()
   ESX.TriggerServerCallback('esx_qalle_brottsregister:grab', function(crimes)
 
       local elements = {}
@@ -72,7 +71,7 @@ function openCriminalRecords(player)
           sendNotification('Åtgärd omöjlig', 'error', 2500)
           menu3.close()               
         else
-            openMenu()
+            openCriminalRecords(player)
           TriggerServerEvent('esx_qalle_brottsregister:add', GetPlayerServerId(player), crime)
         end
 
@@ -98,10 +97,10 @@ function openCriminalRecords(player)
             print('Tog bort: ' .. data2.current.value)
             sendNotification('Lyckades!', 'success', 5000)
             ESX.UI.Menu.CloseAll()
-            openMenu()
+            openCriminalRecords(player)
           else
             ESX.UI.Menu.CloseAll()
-            openMenu()
+            openCriminalRecords(player)
           end                         
 
               end,
