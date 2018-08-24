@@ -33,8 +33,8 @@ AddEventHandler('esx:setJob', function(job)
 end)
 
 RegisterNetEvent('esx_criminalrecords:open')
-AddEventHandler('esx_criminalrecords:open', function()
-    OpenCriminalRecords()
+AddEventHandler('esx_criminalrecords:open', function(closestPlayer)
+    OpenCriminalRecords(closestPlayer)
 end)
 
 -----------------------------------------------------------
