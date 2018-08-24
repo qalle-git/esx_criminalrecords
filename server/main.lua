@@ -63,8 +63,6 @@ ESX.RegisterServerCallback('esx_qalle_brottsregister:grab', function(source, cb,
         })
       end
       cb(crime)
-    else
-    print('Finns inget brott för ' ..identifier)
     end
   end)
 end)
@@ -85,13 +83,3 @@ AddEventHandler('esx_qalle_brottsregister:remove', function(id, crime)
     end
   end)
 end)
---notification
-function sendNotification(xSource, message, messageType, messageTimeout)
-    TriggerClientEvent("pNotify:SendNotification", xSource, {
-        text = message,
-        type = messageType,
-        queue = "qalle",
-        timeout = messageTimeout,
-        layout = "bottomCenter"
-    })
-end

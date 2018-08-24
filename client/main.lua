@@ -15,131 +15,127 @@ ESX                           = nil
 local PlayerData              = {}
 
 Citizen.CreateThread(function ()
-  while ESX == nil do
-    TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-    Citizen.Wait(0)
- 	PlayerData = ESX.GetPlayerData()
-  end
+    while ESX == nil do
+        TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+        Citizen.Wait(0)
+        PlayerData = ESX.GetPlayerData()
+    end
 end)
 
 RegisterNetEvent('esx:playerLoaded')
 AddEventHandler('esx:playerLoaded', function(xPlayer)
-  PlayerData = xPlayer
+    PlayerData = xPlayer
 end)
 
 RegisterNetEvent('esx:setJob')
 AddEventHandler('esx:setJob', function(job)
-  PlayerData.job = job
+    PlayerData.job = job
+end)
+
+RegisterNetEvent('esx_criminalrecords:open')
+AddEventHandler('esx_criminalrecords:open', function()
+    OpenCriminalRecords()
 end)
 
 -----------------------------------------------------------
 --== PUT THIS WHOLE CODE INTO POLICEJOB IN THE F6 MENU ==--
 -----------------------------------------------------------
-function openCriminalRecords(player)
-  ESX.TriggerServerCallback('esx_qalle_brottsregister:grab', function(crimes)
 
-      local elements = {}
+function OpenCriminalRecords(closestPlayer)
+    ESX.TriggerServerCallback('esx_qalle_brottsregister:grab', function(crimes)
 
-        table.insert(elements, {label = 'Lägg till brott', value = 'crime'})
-        table.insert(elements, {label = '----= Brott =----', value = 'spacer'})
+        local elements = {}
+
+        table.insert(elements, {label = 'Add Crime To Player', value = 'crime'})
+        table.insert(elements, {label = '----= Crimes =----', value = 'spacer'})
 
         for i=1, #crimes, 1 do
-          print('Namn: ' .. crimes[i].name  .. ' - ' .. crimes[i].crime .. ' - ' .. crimes[i].date)
-          table.insert(elements, {label = crimes[i].date .. ' - ' .. crimes[i].crime, value = crimes[i].crime, name = crimes[i].name})
+            table.insert(elements, {label = crimes[i].date .. ' - ' .. crimes[i].crime, value = crimes[i].crime, name = crimes[i].name})
         end
 
 
-      ESX.UI.Menu.Open(
-          'default', GetCurrentResourceName(), 'brottsregister',
-          {
-              title    = 'Brottsregister',
-              elements = elements
-          },
-          function(data2, menu2)
+        ESX.UI.Menu.Open(
+            'default', GetCurrentResourceName(), 'brottsregister',
+            {
+                title    = 'Criminalrecord',
+                elements = elements
+            },
+        function(data2, menu2)
 
-          if data2.current.value == 'crime' then
-          ESX.UI.Menu.Open(
-        'dialog', GetCurrentResourceName(), 'brottsregister_second',
-        {
-          title = 'Brott?'
-        },
-        function(data3, menu3)
-        local crime = (data3.value)
-        print(crime)
+            if data2.current.value == 'crime' then
+                ESX.UI.Menu.Open(
+                    'dialog', GetCurrentResourceName(), 'brottsregister_second',
+                    {
+                        title = 'Crime?'
+                    },
+                function(data3, menu3)
+                    local crime = (data3.value)
 
-        if crime == tonumber(data3.value) then
-          sendNotification('Åtgärd omöjlig', 'error', 2500)
-          menu3.close()               
+                    if crime == tonumber(data3.value) then
+                        ESX.ShowNotification('Action Impossible')
+                        menu3.close()               
+                    else
+                        menu2.close()
+                        menu3.close()
+                        TriggerServerEvent('esx_qalle_brottsregister:add', GetPlayerServerId(closestPlayer), crime)
+                        ESX.ShowNotification('Added to register!')
+                        Citizen.Wait(100)
+                        OpenCriminalRecords(closestPlayer)
+                    end
+
+                end,
+            function(data3, menu3)
+                menu3.close()
+            end)
         else
-            openCriminalRecords(player)
-          TriggerServerEvent('esx_qalle_brottsregister:add', GetPlayerServerId(player), crime)
-        end
-
-          end,
-          function(data3, menu3)
-            menu3.close()
-          end
-        )
-        else
-          ESX.UI.Menu.Open(
-              'default', GetCurrentResourceName(), 'remove_confirmation',
-              {
-                  title    = 'Ta Bort?',
-                  elements = {
-                      {label = 'Ja', value = 'yes'},
-                      {label = 'Nej', value = 'no'}
-                  }
-              },
-              function(data3, menu3)
+            ESX.UI.Menu.Open(
+                'default', GetCurrentResourceName(), 'remove_confirmation',
+                    {
+                    title    = 'Remove?',
+                    elements = {
+                        {label = 'Yes', value = 'yes'},
+                        {label = 'No', value = 'no'}
+                    }
+                },
+            function(data3, menu3)
 
                 if data3.current.value == 'yes' then
-            TriggerServerEvent('esx_qalle_brottsregister:remove', GetPlayerServerId(player), data2.current.value)
-            print('Tog bort: ' .. data2.current.value)
-            sendNotification('Lyckades!', 'success', 5000)
-            ESX.UI.Menu.CloseAll()
-            openCriminalRecords(player)
-          else
-            ESX.UI.Menu.CloseAll()
-            openCriminalRecords(player)
-          end                         
+                    menu2.close()
+                    menu3.close()
+                    TriggerServerEvent('esx_qalle_brottsregister:remove', GetPlayerServerId(closestPlayer), data2.current.value)
+                    ESX.ShowNotification('Removed!')
+                    Citizen.Wait(100)
+                    OpenCriminalRecords(closestPlayer)
+                else
+                    menu3.close()
+                end                         
 
-              end,
-              function(data3, menu3)
-          menu3.close()
+                end,
+            function(data3, menu3)
+                menu3.close()
+            end)                 
         end
-          )                 
-          end
 
-          end,
-          function(data2, menu2)
-      menu2.close()
-    end
-      )
-  end, GetPlayerServerId(player))
+        end,
+        function(data2, menu2)
+            menu2.close()
+        end)
+
+    end, GetPlayerServerId(closestPlayer))
 end
 
 Citizen.CreateThread(function()
-  while true do Citizen.Wait(0)
-    if IsControlJustReleased(0, Keys['F5']) then
-      local player, distance = ESX.Game.GetClosestPlayer()
-      if distance ~= -1 and distance <= 3 then
-      	if PlayerData.job.name == 'police' then
-        	openCriminalRecords(player)
+    while true do 
+        Citizen.Wait(5)
+        if IsControlJustReleased(0, Keys['F5']) then
+            if PlayerData.job.name == 'police' then
+                local closestPlayer, distance = ESX.Game.GetClosestPlayer()
+                if distance ~= -1 and distance <= 3 then
+                    OpenCriminalRecords(closestPlayer)
+                else
+                    ESX.ShowNotification('No players nearby')
+                end
+            end
         end
-      else
-  	     sendNotification('not close enough', 'error', 5000)
-      end
     end
-  end
 end)
-
---notification
-function sendNotification(message, messageType, messageTimeout)
-	TriggerEvent("pNotify:SendNotification", {
-		text = message,
-		type = messageType,
-		queue = "records",
-		timeout = messageTimeout,
-		layout = "bottomCenter"
-	})
-end
